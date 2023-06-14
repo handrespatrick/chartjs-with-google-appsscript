@@ -7,58 +7,70 @@
     <title>Vizzlo Solution</title>
   </head>
   <body>
-    <canvas id="chartJSContainer"></canvas>
+    
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.0/jquery.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.4.1/chart.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/chartjs-plugin-datalabels/2.2.0/chartjs-plugin-datalabels.min.js" integrity="sha512-JPcRR8yFa8mmCsfrw4TNte1ZvF1e3+1SdGMslZvmrzDYxS69J7J49vkFL8u6u8PlPJK+H3voElBtUCzaXj+6ig==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>  
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/chartjs-plugin-datalabels/2.2.0/chartjs-plugin-datalabels.min.js" integrity="sha512-JPcRR8yFa8mmCsfrw4TNte1ZvF1e3+1SdGMslZvmrzDYxS69J7J49vkFL8u6u8PlPJK+H3voElBtUCzaXj+6ig==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+
     <script>
-      const sumArrays = (...arrays) => {
-        const n = arrays.reduce((max, xs) => Math.max(max, xs.length), 0);
-        const result = Array.from({ length: n });
-        return result.map((_, i) => arrays.map(xs => xs[i] || 0).reduce((sum, x) => sum + x, 0));
-      }
+      $(document).ready(function(){
+        getData();
+      });
 
-      const data = {
-        labels: [2019, 2020, 2021, 2022],
-        datasets: [
-          {
-            label: "# of Votes",
-            backgroundColor: "rgba(82,154,190,0.5)",
-            data: [1, 4, 7, 1],
-          },
-          {
-            label: "# of sales",
-            backgroundColor: "rgba(151,187,205,0.5)",
-            data: [2, 5, 8, 1],
-          },
-          {
-            label: "# of idontknow",
-            backgroundColor: "rgba(220,220,220,0.5)",
-            data: [3, 6, 9, 1],
+      function getData(){
+        google.script.run.withSuccessHandler(function(ret){
+
+          const sumArrays = (...arrays) => {
+            const n = arrays.reduce((max, xs) => Math.max(max, xs.length), 0);
+            const result = Array.from({ length: n });
+            return result.map((_, i) => arrays.map(xs => xs[i] || 0).reduce((sum, x) => sum + x, 0));
           }
-        ]
-      }
 
-      const options = {
-        responsive: true,
-        scales: {
-            x: {
-              stacked: true,
+          const dataChart = ret.data
+          let labelChart = ret.label
+
+          const data = {
+            labels: labelChart,
+            datasets: [
+              {
+                label: "# of Votes",
+                backgroundColor: "rgba(82,154,190,0.5)",
+                data: dataChart[1],
+              },
+              {
+                label: "# of sales",
+                backgroundColor: "rgba(151,187,205,0.5)",
+                data: dataChart[2],
+              },
+              {
+                label: "# of idontknow",
+                backgroundColor: "rgba(220,220,220,0.5)",
+                data: dataChart[3],
+              }
+            ]
+          }
+
+          const options = {
+            responsive: true,
+            scales: {
+                x: {
+                  stacked: true,
+                },
+                y: {
+                  stacked: true,
+                  beginAtZero: true,
+                  grace: '10%'
+                }
             },
-            y: {
-              stacked: true,
-              beginAtZero: true,
-              grace: '10%'
-            }
-        },
-        plugins: {
-          customValue: {
-            offset: 5,
-            dash: [5, 15],
-          },
-        },
-      }
+            plugins: {
+              customValue: {
+                offset: 5,
+                dash: [5, 15],
+              },
+            },
+          }
 
-      const cagr = {
+          const cagr = {
           id: "cagr",
           afterDraw: (chart, args, opts) => {
             const {
@@ -95,24 +107,40 @@
                   if (i==j) {
                     return
                   }
-                  ctx.fillText(barValue, axis[i].x + (difference/2), (axis[j].y - lineHeight * 3), axis[i].width); //insere a porcentagem em cima da linha
-                  
                   ctx.beginPath();
                   ctx.strokeStyle = 'green';
                   ctx.moveTo(axis[i].x, axis[i].y - lineHeight * 2); //linha começa desse ponto
                   ctx.lineTo(axis[i].x, axis[j].y - lineHeight * 2); //desenha linha pra cima
                   ctx.lineTo(axis[j].x, axis[j].y - lineHeight * 2); //desenha linha para o lado
-                  ctx.stroke();   
+                  ctx.stroke();
+
+                  ctx.beginPath();  
+                  ctx.roundRect(axis[i].x + (difference/2.5), (axis[j].y - lineHeight * 4), (difference/5), 40, [40]);
+                  ctx.fillStyle = 'white';
+                  ctx.fill();
+                  ctx.stroke();
+
+                  ctx.fillStyle = "black";
+                  ctx.fillText(`+${barValue}`, axis[i].x + (difference/2), (axis[j].y - lineHeight * 2), axis[i].width);
+                  ctx.stroke();
                                  
                 } else {
-                  ctx.fillText(barValue, axis[j].x, (axis[i].y - lineHeight * 3), axis[i].width)
-
                   ctx.beginPath();
                   ctx.strokeStyle = 'red';
                   ctx.moveTo(axis[i].x, axis[i].y - lineHeight * 2);
                   ctx.lineTo(axis[j].x, axis[i].y - lineHeight * 2);
                   ctx.lineTo(axis[j].x, axis[j].y - lineHeight * 2);
-                  ctx.stroke();   
+                  ctx.stroke();
+
+                  ctx.beginPath();  
+                  ctx.roundRect(axis[i].x + (difference/2.5), (axis[i].y - lineHeight * 4), (difference/5), 40, [40]);
+                  ctx.fillStyle = 'white';
+                  ctx.fill();
+                  ctx.stroke();
+
+                  ctx.fillStyle = "black";
+                  ctx.fillText(barValue, axis[j].x - (difference/2), (axis[i].y - lineHeight * 2), axis[j].width)
+                  ctx.stroke(); 
                 }
                 i++
                 j++
@@ -121,17 +149,21 @@
           }
         }
 
-      const plugins = [ChartDataLabels, cagr]
+        const plugins = [ChartDataLabels, cagr]
 
-      const config = {
-        type: "bar",
-        data,
-        options,
-        plugins,
-      };
+        const config = {
+          type: "bar",
+          data,
+          options,
+          plugins,
+        };
 
-      const ctx = document.getElementById("chartJSContainer").getContext("2d");
-      new Chart(ctx, config);
+        const ctx = document.getElementById("chartJSContainer").getContext("2d");
+        new Chart(ctx, config);
+
+        }).getData();
+      }
     </script>
+    <canvas id="chartJSContainer"></canvas>
   </body>
 </html>
