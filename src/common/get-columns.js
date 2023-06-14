@@ -11,7 +11,7 @@ function getColumns() {
     matrizesColunas.push([]);
   }
 
-  for (var i = 0; i < dados.length; i++) {
+  for (var i = 1; i < dados.length; i++) {
     for (var j = 0; j < dados[i].length; j++) {
       var valor = dados[i][j];
       matrizesColunas[j].push(valor);

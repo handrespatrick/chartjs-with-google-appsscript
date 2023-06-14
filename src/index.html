@@ -26,28 +26,12 @@
             return result.map((_, i) => arrays.map(xs => xs[i] || 0).reduce((sum, x) => sum + x, 0));
           }
 
-          const dataChart = ret.data
-          let labelChart = ret.label
+          const datasets = ret.data.datasets
+          const labels = ret.data.header
 
           const data = {
-            labels: labelChart,
-            datasets: [
-              {
-                label: "# of Votes",
-                backgroundColor: "rgba(82,154,190,0.5)",
-                data: dataChart[1],
-              },
-              {
-                label: "# of sales",
-                backgroundColor: "rgba(151,187,205,0.5)",
-                data: dataChart[2],
-              },
-              {
-                label: "# of idontknow",
-                backgroundColor: "rgba(220,220,220,0.5)",
-                data: dataChart[3],
-              }
-            ]
+            labels,
+            datasets
           }
 
           const options = {
