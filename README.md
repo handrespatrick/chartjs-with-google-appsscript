@@ -1,1 +1,1 @@
-# Arrow CAGR using Google Sheets
+# Arrow CAGR using Google Sheets and ChartJS
